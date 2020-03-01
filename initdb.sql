@@ -61,7 +61,7 @@ CREATE VIEW book_info AS (
 );
 
 CREATE VIEW author_info AS (
-    SELECT a.id AS id, a.name AS name, AVG(b.rating) AS rating
+    SELECT a.id AS id, a.name AS name, AVG(b.rating) AS rating, COUNT(b.id) AS nbooks
     FROM author AS a
     LEFT JOIN book_author AS b_a
     ON a.id = b_a.author_id

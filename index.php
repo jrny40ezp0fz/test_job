@@ -61,18 +61,23 @@
 
         $content = '';
 
-        if ( !($result = pg_query($dbconnection, "SELECT id, name, rating FROM author_info ORDER BY name"))) {
+        if ( !($result = pg_query($dbconnection, "SELECT id, name, rating, nbooks FROM author_info ORDER BY " .
+                                    ((isset($_POST['orderByRating'])) ? "rating" : (isset($_POST['orderByBooksNum']) ? "nbooks" : "name")) .
+                                    ((isset($_POST['order']) && $_POST['order'] == 'asc') ? ' DESC NULLS LAST' : ' ASC NULLS LAST')
+                                ))) {
             $warnings .= "<i>Database query error.</i><br>";
             return;
         }
 
         $content .= '<div class="contentTable">';
 
-        $content .= '<span class="contentRow">' .
+        $content .= '<form class="contentRow" action="index.php" method="post">' .
                     '<span class="contentCell"><b><i>ID</i></b></span>' .
                     '<span class="contentCell"><b><i>Name</i></b></span>' .
-                    '<span class="contentCell"><b><i>Rating</i></b></span>' .
-                    '</span>';
+                    '<span class="contentCell"><b><i>Rating</i></b><input type="submit" name="orderByRating" value="Sort"></span>' .
+                    '<span class="contentCell"><b><i>Books</i></b><input type="submit" name="orderByBooksNum" value="Sort"></span>' .
+                    '<span class="contentCell"><input type="hidden" name="order" value="' . ((isset($_POST['order']) && $_POST['order'] == 'asc') ? 'desc' : 'asc') .'"></span>' .
+                    '</form>';
 
         while ( $row = pg_fetch_row($result)) {
             $content .= '<form class="contentRow" action="index.php" method="post">';
@@ -80,6 +85,7 @@
             $content .= '<span class="contentCell">' . $row[0] . '</span>';
             $content .= '<span class="contentCell"><input type="text" placeholder="Author name" name="authorName" value="' . $row[1] . '" required></span>';
             $content .= '<span class="contentCell">' . $row[2] . '</span>';
+            $content .= '<span class="contentCell">' . $row[3] . '</span>';
             $content .= '<span class="contentCell"><input type="submit" name="editAuthor" value="edit"></span>';
             $content .= '<span class="contentCell"><input type="submit" name="deleteAuthor" value="-"></span>';
             $content .= '<span class="contentCell"><input type="hidden" name="authorID" value="' . $row[0] . '"></span>';
